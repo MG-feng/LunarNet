@@ -55,61 +55,6 @@
 
 ---
 
-## 🚀 快速开始
-
-### 安装
-
-```bash
-# 克隆仓库
-git clone https://github.com/MG-feng/LunarNet.git
-cd LunarNet
-
-# 安装依赖
-pip install torch>=2.0.0 psutil>=5.9.0
-
-# 可选：安装Flash Attention（GPU版加速）
-pip install flash-attn --no-build-isolation
-```
-
-### 基础使用
-
-```python
-# 自动检测硬件，一键运行
-from lunarnet import LunarNetGPUConfig, LunarNetModel
-from lunarnet.utils import auto_config, quick_generate
-
-# 1. 自动配置（根据你的硬件自适应）
-config = auto_config()
-model = LunarNetModel(config)
-
-# 2. 生成代码
-prompt = "def fibonacci(n):"
-output = quick_generate(model, prompt, tokenizer, max_new=100)
-print(output)
-```
-
-### CPU版使用
-
-```python
-from lunarnet import LunarNetCPUConfig, LunarNetModel
-from lunarnet.utils import auto_config_cpu
-
-config = auto_config_cpu()  # 自动适配4-8GB内存
-model = LunarNetModel(config)
-```
-
-### 多服务器并行生成
-
-```bash
-# 服务器1
-python -c "from lunarnet.distributed import DistributedRunner; r=DistributedRunner(config); r.run_worker(model, tokenizer)"
-
-# 服务器2（自动从队列获取任务）
-python -c "from lunarnet.distributed import DistributedRunner; r=DistributedRunner(config); r.run_worker(model, tokenizer)"
-```
-
----
-
 ## 🏗️ 架构详解
 
 ### 整体数据流
@@ -141,6 +86,18 @@ python -c "from lunarnet.distributed import DistributedRunner; r=DistributedRunn
 
 ---
 
+## 🛠️ 硬件兼容性
+
+| 硬件配置 | CPU版 | GPU版 | 预期速度 |
+| :--- | :--- | :--- | :--- |
+| **纯CPU (4GB RAM)** | ✅ 可用（极限模式） | ❌ | 0.3-0.5 tok/s |
+| **纯CPU (8GB RAM)** | ✅ 流畅运行 | ❌ | 0.5-1 tok/s |
+| **T4 (16GB)** | ✅ 可运行 | ✅ 原生支持 | 3-5 tok/s |
+| **RTX 3060 (12GB)** | ✅ | ✅ | 5-8 tok/s |
+| **A100 (40GB)** | ✅ | ✅ 全速 | 15-25 tok/s |
+
+---
+
 ## 📁 项目结构
 
 ```
@@ -160,47 +117,6 @@ LunarNet/
 ├── LICENSE                  # Apache 2.0
 └── README.md               # 本文档
 ```
-
----
-
-## 🔬 训练与微调
-
-### 预训练
-
-```python
-from lunarnet.trainer import LunarNetTrainer
-from lunarnet.utils import auto_config
-
-config = auto_config()
-model = LunarNetModel(config)
-trainer = LunarNetTrainer(model, config)
-
-# 准备数据：List[str] 格式的代码文本
-dataloader = CodeDataset(codes, tokenizer)
-trainer.train_epoch(dataloader)
-```
-
-### LoRA微调（节省内存）
-
-```python
-from lunarnet.trainer import LoRATrainer
-
-trainer = LoRATrainer(model, config, rank=8)
-# 只训练LM Head，内存占用降低90%
-trainer.train_epoch(dataloader)
-```
-
----
-
-## 🛠️ 硬件兼容性
-
-| 硬件配置 | CPU版 | GPU版 | 预期速度 |
-| :--- | :--- | :--- | :--- |
-| **纯CPU (4GB RAM)** | ✅ 可用（极限模式） | ❌ | 0.3-0.5 tok/s |
-| **纯CPU (8GB RAM)** | ✅ 流畅运行 | ❌ | 0.5-1 tok/s |
-| **T4 (16GB)** | ✅ 可运行 | ✅ 原生支持 | 3-5 tok/s |
-| **RTX 3060 (12GB)** | ✅ | ✅ | 5-8 tok/s |
-| **A100 (40GB)** | ✅ | ✅ 全速 | 15-25 tok/s |
 
 ---
 
@@ -232,11 +148,347 @@ trainer.train_epoch(dataloader)
 
 ---
 
+## 📞 联系方式
+
 - 作者: **MG-feng**
+- GitHub: [MG-feng](https://github.com/MG-feng)
+- 项目地址: [https://github.com/MG-feng/LunarNet](https://github.com/MG-feng/LunarNet)
 
 ---
 
 ## ⭐ Star 历史
 
 如果这个项目对你有帮助，请给一个 Star ⭐ 支持一下！
+
+---
+
+---
+
+# 📖 使用指南
+
+> 以下为详细的使用方法、API文档和示例代码。
+
+---
+
+## 🚀 快速开始
+
+### 安装
+
+```bash
+# 克隆仓库
+git clone https://github.com/MG-feng/LunarNet.git
+cd LunarNet
+
+# 安装依赖
+pip install torch>=2.0.0 psutil>=5.9.0
+
+# 可选：安装Flash Attention（GPU版加速）
+pip install flash-attn --no-build-isolation
+```
+
+---
+
+## 💻 基础使用
+
+### 自动检测硬件，一键运行
+
+```python
+from lunarnet import LunarNetGPUConfig, LunarNetModel
+from lunarnet.utils import auto_config, quick_generate
+
+# 1. 自动配置（根据你的硬件自适应）
+config = auto_config()
+model = LunarNetModel(config)
+
+# 2. 生成代码
+prompt = "def fibonacci(n):"
+output = quick_generate(model, prompt, tokenizer, max_new=100)
+print(output)
+```
+
+---
+
+## 🖥️ CPU版使用
+
+```python
+from lunarnet import LunarNetCPUConfig, LunarNetModel
+from lunarnet.utils import auto_config_cpu
+
+# 自动适配4-8GB内存
+config = auto_config_cpu()
+model = LunarNetModel(config)
+
+# 生成
+prompt = "def quick_sort(arr):"
+ids = tokenizer.encode(prompt)
+output = model.generate(torch.tensor([ids]), max_new_tokens=200)
+print(tokenizer.decode(output[0].tolist()))
+```
+
+---
+
+## 🎮 GPU版使用
+
+```python
+from lunarnet import LunarNetGPUConfig, LunarNetModel
+from lunarnet.utils import auto_config
+
+config = auto_config()  # 自动检测GPU
+model = LunarNetModel(config)
+
+# 批量生成
+prompts = [
+    "def fibonacci(n):",
+    "def quick_sort(arr):",
+    "class LinkedList:"
+]
+for p in prompts:
+    output = quick_generate(model, p, tokenizer, max_new=100)
+    print(f"=== {p} ===\n{output}\n")
+```
+
+---
+
+## 🌐 多服务器并行生成
+
+### 启动服务器1（主节点）
+
+```bash
+python -c "
+from lunarnet.distributed import DistributedRunner
+from lunarnet import LunarNetGPUConfig, LunarNetModel
+
+config = LunarNetGPUConfig()
+config.server_rank = 0
+config.server_world_size = 3
+model = LunarNetModel(config)
+runner = DistributedRunner(config)
+runner.run_worker(model, tokenizer)
+"
+```
+
+### 启动服务器2（工作节点）
+
+```bash
+python -c "
+from lunarnet.distributed import DistributedRunner
+from lunarnet import LunarNetGPUConfig, LunarNetModel
+
+config = LunarNetGPUConfig()
+config.server_rank = 1
+config.server_world_size = 3
+model = LunarNetModel(config)
+runner = DistributedRunner(config)
+runner.run_worker(model, tokenizer)
+"
+```
+
+### 提交任务
+
+```python
+from lunarnet.distributed import DistributedRunner
+
+runner = DistributedRunner(config)
+task_id = runner.submit_task(
+    "game_001",
+    "用Python和Pygame写一个贪吃蛇游戏，包含分数和游戏结束逻辑",
+    max_new_tokens=2000
+)
+print(f"任务已提交: {task_id}")
+```
+
+---
+
+## 🔬 训练与微调
+
+### 预训练
+
+```python
+from lunarnet.trainer import LunarNetTrainer
+from lunarnet.utils import auto_config
+from torch.utils.data import DataLoader
+
+config = auto_config()
+model = LunarNetModel(config)
+trainer = LunarNetTrainer(model, config)
+
+# 准备数据：List[str] 格式的代码文本
+codes = ["def hello(): print('world')", "class Test: pass"]
+dataloader = DataLoader(CodeDataset(codes, tokenizer), batch_size=4)
+
+trainer.train_epoch(dataloader, log_steps=10, save_steps=100)
+```
+
+### LoRA微调（节省内存）
+
+```python
+from lunarnet.trainer import LoRATrainer
+
+# 只训练LM Head，内存占用降低90%
+trainer = LoRATrainer(model, config, rank=8)
+trainer.train_epoch(dataloader)
+```
+
+### 加载预训练权重
+
+```python
+# 从检查点恢复
+trainer.load_checkpoint("checkpoints/checkpoint_1000.pt")
+
+# 或从Hugging Face加载（需先上传）
+from huggingface_hub import snapshot_download
+model_dir = snapshot_download("MG-feng/LunarNet-1B")
+model = LunarNetModel.from_pretrained(model_dir)
+```
+
+---
+
+## 🛠️ 工具函数
+
+### 批量生成
+
+```python
+from lunarnet.utils import batch_generate
+
+prompts = ["def add(a,b):", "def multiply(a,b):", "def divide(a,b):"]
+results = batch_generate(model, prompts, tokenizer, batch_size=2)
+for p, r in zip(prompts, results):
+    print(f"{p}\n{r}\n")
+```
+
+### 性能测量
+
+```python
+from lunarnet.utils import measure_inference_speed
+
+stats = measure_inference_speed(
+    model,
+    input_ids=torch.randint(0, 1000, (1, 50)),
+    num_iterations=10,
+    max_new_tokens=100
+)
+print(f"平均速度: {stats['avg_tokens_per_second']:.2f} tok/s")
+```
+
+### 导出ONNX
+
+```python
+from lunarnet.utils import export_to_onnx
+
+export_to_onnx(model, (1, 128), "lunarnet.onnx")
+```
+
+### 内存分析
+
+```python
+from lunarnet.utils import profile_model_memory
+
+mem_stats = profile_model_memory(model, (1, 512))
+print(f"峰值显存: {mem_stats['peak_memory_gb']:.2f} GB")
+```
+
+---
+
+## ⚙️ 高级配置
+
+### 自定义CPU配置
+
+```python
+from lunarnet import LunarNetCPUConfig
+
+config = LunarNetCPUConfig(
+    hidden_size=1024,           # 更小模型
+    num_hidden_layers=8,        # 更少层数
+    num_experts=4,              # 更少专家
+    max_position_embeddings=2048,
+    max_ram_gb=4.0,             # 限制内存
+)
+model = LunarNetModel(config)
+```
+
+### 自定义GPU配置
+
+```python
+from lunarnet import LunarNetGPUConfig
+
+config = LunarNetGPUConfig(
+    hidden_size=2048,
+    num_hidden_layers=16,
+    gpu_memory_fraction=0.8,    # 使用80%显存
+    kv_cache_dtype="int8",      # KV Cache用int8
+    use_flash_attention=True,
+)
+model = LunarNetModel(config)
+```
+
+---
+
+## 🐛 常见问题
+
+### Q: 内存不足怎么办？
+
+**A**: 
+1. 使用CPU版，启用swap分区
+2. 降低 `max_position_embeddings` 到2048
+3. 减少 `num_experts` 到4
+4. 使用LoRA微调而非全量训练
+
+### Q: 如何加速推理？
+
+**A**:
+1. GPU版安装Flash Attention
+2. 启用 `torch.compile`
+3. 使用 `batch_generate` 批量处理
+4. 多服务器并行分发任务
+
+### Q: 模型何时可用？
+
+**A**: 当前版本为架构原型（v0.1），权重为随机初始化。你需要：
+1. 使用 `trainer.py` 在代码数据集上训练
+2. 或加载预训练权重（如有）
+
+---
+
+## 📚 API参考
+
+### LunarNetModel
+
+| 方法 | 参数 | 返回值 | 说明 |
+| :--- | :--- | :--- | :--- |
+| `forward()` | `input_ids`, `mask` | `{"logits", "hidden"}` | 前向传播 |
+| `generate()` | `input_ids`, `max_new_tokens`, `temp`, `top_p` | `torch.LongTensor` | 自回归生成 |
+| `get_memory_stats()` | - | `dict` | 内存使用统计 |
+
+### LunarNetTrainer
+
+| 方法 | 参数 | 返回值 | 说明 |
+| :--- | :--- | :--- | :--- |
+| `train_step()` | `batch` | `{"loss", "lr"}` | 单步训练 |
+| `train_epoch()` | `dataloader` | `{"avg_loss"}` | 训练一个epoch |
+| `save_checkpoint()` | - | - | 保存模型 |
+| `load_checkpoint()` | `path` | - | 加载模型 |
+
+---
+
+## 📦 依赖清单
+
+```
+torch>=2.0.0
+psutil>=5.9.0
+# 可选
+flash-attn (GPU加速)
+huggingface_hub (模型加载)
+ray (分布式，替代文件队列)
+```
+
+---
+
+## 🙏 致谢
+
+- 感谢所有开源社区贡献者
+- 特别感谢 PyTorch 团队提供的基础框架
+
+---
+
+**Happy Coding! 🚀**
 ```
