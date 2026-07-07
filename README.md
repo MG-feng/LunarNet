@@ -3,7 +3,7 @@
 > **Paper Draft v0.1** | GitHub Preprint  
 > **Status:** Work in Progress — Nooth-3B-0.0.1-alpha under development  
 > **Date:** 2026-07-07  
-> **Team:** Nooth Research Collective
+> **Team:** Moonlight Games
 
 ---
 
