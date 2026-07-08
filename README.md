@@ -105,9 +105,9 @@ Apache License — see [LICENSE](LICENSE) for details.
 
 ## 🔗 Links
 
-- **Repository:** https://github.com/MG-feng/Nooht
-- **Issues:** https://github.com/MG-feng/Nooht/issues
-- **Discussions:** https://github.com/MG-feng/Nooht/discussions
+- **Repository:** https://github.com/MG-feng/Nooht-by-MG
+- **Issues:** https://github.com/MG-feng/Nooht-by-MG/issues
+- **Discussions:** https://github.com/MG-feng/Nooht-by-MG/discussions
 
 ---
 
