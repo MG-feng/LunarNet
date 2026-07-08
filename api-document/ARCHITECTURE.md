@@ -453,5 +453,3 @@ AdapterFactory.create("onnx", model_path="...")
 
 ---
 
-<p align="center"><i>Architecture approved by ChatGPT 5.5 (Technical Director)</i></p>
-'''
