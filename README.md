@@ -99,7 +99,7 @@ For vulnerability reports, see [SECURITY.md](.github/SECURITY.md).
 
 ## 📄 License
 
-MIT License — see [LICENSE](LICENSE) for details.
+Apache License — see [LICENSE](LICENSE) for details.
 
 ---
 
@@ -113,7 +113,3 @@ MIT License — see [LICENSE](LICENSE) for details.
 
 <p align="center"><i>Built for Nightglow. Open to all.</i></p>
 '''
-
-with open(os.path.join(base_dir, "README.md"), "w", encoding="utf-8") as f:
-    f.write(readme_md)
-print("✅ Created: README.md")
