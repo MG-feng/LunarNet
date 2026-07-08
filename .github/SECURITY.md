@@ -1,6 +1,6 @@
 
 # ============================================================
-# 3. .github/SECURITY.md — Security policy for Q&A
+# 3.Security policy for Q&A
 # ============================================================
 
 security_md = r'''# Security Policy
