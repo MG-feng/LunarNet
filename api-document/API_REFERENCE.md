@@ -649,6 +649,3 @@ All public methods raise the following exceptions:
 | `RuntimeError` | Backend connection failure |
 
 ---
-
-<p align="center"><i>API documentation maintained by Qwen-Coder (Framework Maintainer)</i></p>
-'''
