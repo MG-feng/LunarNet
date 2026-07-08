@@ -1,0 +1,313 @@
+
+# Generate Summary Report with detailed tables
+
+summary_report = """# Nooht Framework v0.1 Alpha — Summary Report
+## Project: Nightglow Model Cognitive Infrastructure Layer
+
+**Document:** summary_report.md  
+**Version:** 0.1-alpha  
+**Date:** 2026-07-08  
+**Status:** Architecture Approved / Validation Phase  
+**Target Model:** Nightglow-3B  
+**Deployment Target:** Single T4 GPU  
+
+---
+
+## 1. Executive Summary
+
+Nooht is a **model-agnostic structured code cognition memory system** designed to give small code LLMs (specifically Nightglow-3B) repository-level understanding without increasing parameter count or context window size. 
+
+**Core Thesis:** Instead of making the model remember more tokens, give the model a compressible, retrievable, and long-term maintainable code cognition system.
+
+---
+
+## 2. Module Architecture Overview
+
+| Module | Full Name | Purpose | Key Innovation | Current Status | Next Milestone |
+|--------|-----------|---------|----------------|----------------|----------------|
+| Symbol Memory | Structured Symbolic Memory | Store structured code knowledge (functions, classes, APIs, imports, dependencies) | Entity-level abstraction with typed schema; preserves semantic relationships and source location | ✅ Design Approved | Tree-sitter parser integration |
+| DuckDB Backend | DuckDB Metadata Store | Metadata storage, repo indexing, entity queries, large-scale scanning | Serverless, columnar, high-performance embedded DB optimized for T4 environments | ✅ Implemented | Million-row stress test |
+| FAISS Retrieval | FAISS Vector Store | Semantic similarity search over compressed code representations | GPU-accelerated ANN with DuckDB community extension; PQ quantization for T4 VRAM | ✅ Implemented | Index tuning (nlist, nprobe) |
+| HMC | Hierarchical Memory Compression | Compress memory before deletion when capacity limits are reached | Compression-first principle: L1 semantic summary → L2 module abstraction → L3 archive before deletion | 🟡 Architecture Approved | Fidelity test (>85% functional equivalence) |
+| SCM | Semantic Code Memory | Transform raw code into semantic memory representations | 80-90% token reduction while preserving functional relationships and dependency graphs | 🟡 Architecture Approved | Recall test (>90% top-5 on CodeSearchNet) |
+| Context Manager | Dynamic Context Manager | Manage model context window with token budget and priority scheduling | Four-tier priority system (L0-L3) with dynamic compression triggers | ✅ Implemented | Nightglow integration test |
+| Adapter Layer | Model-Agnostic Adapter | Decouple Nooht from any specific LLM backbone | Unified retrieve/compress/inject interface; zero model modification required | ✅ Design Approved | API stability test with Nightglow |
+
+---
+
+## 3. Technology Stack & Rationale
+
+| Component | Selected Technology | Alternatives Considered | Why Selected | Why Rejected Alternatives | Research Support |
+|-----------|---------------------|------------------------|-------------|--------------------------|------------------|
+| Metadata Store | **DuckDB** | SQLite, PostgreSQL, MongoDB | Serverless, columnar, single-file, analytical query optimized, FAISS extension | SQLite: weak analytics; PostgreSQL: requires server; MongoDB: high memory | Columnar vectorized execution optimized for analytical code metadata queries |
+| Vector Search | **FAISS** | Pinecone, Weaviate, Chroma, Milvus | Self-hosted, GPU-native (CUDA), PQ/IVF quantization, DuckDB integration, T4-optimized | Pinecone: cloud-only; Weaviate/Chroma: no GPU accel; Milvus: overkill for v0.1 | FAISS PQ achieves 10-20x memory reduction with minimal recall loss |
+| Code Parser | **Tree-sitter** | Pygments, ANTLR, custom regex | Incremental parsing, 40+ languages, AST output, fast indexing | Pygments: no AST; ANTLR: heavy; Regex: fragile | AST is the semantic hierarchy of code; H2MT proves hierarchy-aware units outperform flat chunks |
+| Embedding Model | **TBD** (to be selected) | CodeBERT, CodeT5, E5, BGE | Will be selected based on CodeSearchNet benchmark | — | Code-specific embeddings outperform general embeddings for retrieval |
+| Compression | **HMC + SCM** | Naive truncation, LLM summarization, token eviction (H2O) | Structured semantic compression preserves code relationships and reconstructability | Truncation: loses information; Summarization: unstructured; Eviction: no persistence | Melodi: 8x memory reduction; HMT: 25.5% perplexity improvement |
+| Context Strategy | **L0-L3 Priority** | FIFO, LRU, random eviction | Task-aware priority preserves current work while archiving historical context | FIFO/LRU: task-unaware; Random: unpredictable | HMT three-tier memory directly inspires this design |
+
+---
+
+## 4. Nooht vs. Existing Architectures: Comprehensive Comparison
+
+### 4.1 High-Level Architecture Matrix
+
+| Dimension | Vanilla LLM | Long-Context LLM | Standard RAG | Agent Memory (MemGPT/Mem0) | **Nooht** |
+|-----------|-------------|-------------------|--------------|---------------------------|-----------|
+| **Core Strategy** | Scale parameters | Scale KV Cache | Retrieve text chunks | Save conversation history | **Structured code cognition** |
+| **Memory Unit** | Model parameters | Token key-value states | Fixed-size text chunks | Chat messages / summaries | **Symbols (Function/Class/API)** |
+| **Understanding Depth** | Surface | Surface | Weak (lexical) | Medium | **Strong (structured semantic)** |
+| **Code-Specific** | No | No | No | No | **Yes (native)** |
+| **Compression** | None | None (quadratic cost) | None | Summarization | **Hierarchical semantic compression** |
+| **Long-term Retention** | Poor | Session-only | Index-dependent | Medium | **Strong (persistent structured store)** |
+| **Code Relationship Awareness** | Low | Low | Very Low | Low | **High (dependency graph + data flow)** |
+| **Inference Cost** | High | Very High (VRAM) | Medium + latency | Medium | **Low (T4-optimized)** |
+| **Model Dependency** | Strong | Strong | Weak | Medium | **Weak (adapter layer)** |
+| **Hallucination Reduction** | Baseline | Baseline | Medium (chunk noise) | Medium | **High (symbolic grounding)** |
+| **Context Pressure** | High | Very High | Medium | Medium | **Low (semantic compression)** |
+| **Repo-Level Understanding** | Impossible | Expensive | Noisy | Poor | **Designed for it** |
+| **Deployment Cost** | $$$ (A100/H100) | $$$ (A100/H100) | $$ (cloud vector DB) | $$ (API costs) | **$ (T4 single GPU)** |
+
+### 4.2 Nooht vs. RAG: Technical Detail
+
+| Aspect | Standard RAG | **Nooht Symbolic Retrieval** | Evidence |
+|--------|-------------|------------------------------|----------|
+| **Data Unit** | Fixed-size text chunks (e.g., 512 tokens) | **Function/Class/API entities with typed schemas** | H2MT: hierarchy-aware units outperform flat chunks (24.90 vs. 13.1 F1 on NarrativeQA) |
+| **Retrieval Precision** | Lexical/semantic similarity over raw text | **Structured query over symbol types + semantic vector search** | RAPTOR/KV-RAPTOR: hierarchical retrieval reduces noise by 60%+ vs. naive RAG |
+| **Information Density** | Low (boilerplate + comments included) | **High (compressed semantic essence)** | Melodi: 8x memory reduction via hierarchical compression |
+| **Relationship Preservation** | Lost across chunk boundaries | **Native dependency graph + call chain tracking** | GraphRAG/Mem0g: graph structures outperform flat vectors for relational reasoning |
+| **Update Granularity** | Re-index chunks (O(n)) | **Update single symbols (O(1))** | Symbol-level updates are orders of magnitude faster |
+| **Token Efficiency** | ~500 tokens per chunk | **~50-100 tokens per semantic symbol** | SCM targets 80-90% token reduction vs. raw code |
+| **Multi-hop Reasoning** | Poor (no cross-chunk structure) | **Strong (dependency traversal)** | H2MT coarse-to-fine routing enables multi-hop reasoning (60.7 vs. 54.5 ROUGE-L) |
+| **Code Boundary Preservation** | ❌ Broken (functions split across chunks) | **✅ Intact (complete entity storage)** | Critical for code generation accuracy |
+
+### 4.3 Nooht vs. KV Cache Optimization
+
+| Aspect | KV Cache (Long Context) | **Nooht External Memory** | Evidence |
+|--------|-------------------------|---------------------------|----------|
+| **Storage Content** | Raw token key-value states | **Semantic knowledge + structured symbols** | HMT: memory embeddings outperform raw token state passing |
+| **Lifecycle** | Session-ephemeral | **Persistent across sessions** | Long-term memory requires explicit storage; KV cache is transient |
+| **Model Binding** | Strong (architecture-specific) | **Weak (via adapter layer)** | HMT: "model-independent plug-and-play" |
+| **Compression** | Difficult (lossy quantization only) | **Native hierarchical semantic compression** | Melodi: 8x reduction vs. Memorizing Transformer dense KV |
+| **Scalability** | Quadratic attention cost O(n²) | **Linear with symbol count O(n)** | HMT maintains O(1) peak memory regardless of input length |
+| **Code Understanding** | Token-level pattern matching | **Concept-level code cognition** | Symbolic memory enables abstract architectural reasoning |
+| **Hardware Requirement** | A100/H100 for 128K+ context | **T4 GPU sufficient** | Target deployment constraint: single T4 GPU |
+| **Cross-Session Memory** | ❌ Lost after inference | **✅ Persistent in DuckDB** | Critical for long-term project knowledge |
+
+### 4.4 Nooht vs. Memory-Augmented LLMs (SOTA Research)
+
+| Aspect | Melodi (Google DeepMind) | HMT (NAACL 2025) | H2MT (2026) | **Nooht** | Key Differentiator |
+|--------|--------------------------|-------------------|-------------|-----------|-------------------|
+| **Memory Type** | Hierarchical token compression | Sensory / Short-term / Long-term layers | Semantic tree with node embeddings | **Symbol Memory + HMC + SCM** | Nooht is the **only code-specific** implementation |
+| **Compression Levels** | 2 (short + long-term) | 3 (sensory + short + long-term) | Tree-level aggregation | **3+ (L0-L3 with semantic compression)** | Nooht adds code-aware semantic compression |
+| **Domain** | General long documents | General long documents | Structured technical documents | **Code repositories exclusively** | Code has unique structure: AST, call graphs, types |
+| **Storage Backend** | In-model memory tokens | In-model memory tokens | Cached node embeddings | **DuckDB + FAISS (external)** | External storage enables cross-session persistence and model independence |
+| **Retrieval Mechanism** | Attention-based conditioning | Memory retrieval + cross-attention | Coarse-to-fine tree routing | **Vector search + structured query + dependency traversal** | Nooht combines multiple retrieval paradigms |
+| **Plug-and-Play** | Requires model modification | Requires fine-tuning | Requires fine-tuning | **Zero model modification (adapter only)** | Nooht's biggest practical advantage |
+| **Deployment Cost** | High (model training) | High (model training) | High (model training) | **Low (inference-time only)** | No training required for v0.1 |
+
+---
+
+## 5. Symbol Memory Entity Schema
+
+| Field | Type | Description | Example |
+|-------|------|-------------|---------|
+| `id` | UUID | Unique entity identifier | `sym-7f3a-9e2b` |
+| `repo_id` | String | Repository identifier | `nightglow-core` |
+| `type` | Enum | Entity type | `Function`, `Class`, `API`, `Import`, `Interface`, `Enum`, `Module` |
+| `name` | String | Symbol name | `authenticate_user` |
+| `signature` | String | Function/class signature | `def authenticate_user(credentials: Credentials) -> JWTResult:` |
+| `description` | String | Human-readable summary | "Authenticates user credentials and returns JWT token" |
+| `inputs` | List[Param] | Input parameters with types | `[{"name": "credentials", "type": "Credentials"}]` |
+| `outputs` | List[Param] | Return values with types | `[{"type": "JWTResult"}]` |
+| `dependencies` | List[SymbolRef] | Referenced symbols (imports, calls) | `["bcrypt.checkpw", "jwt.encode", "UserModel.find"]` |
+| `logic_summary` | String | High-level logic flow | "Validate input → Verify password → Generate JWT → Return" |
+| `source_location` | Object | File path + line range | `{"file": "auth.py", "lines": [45, 89]}` |
+| `embedding` | Vector[768] | Semantic embedding vector | `[0.023, -0.156, ...]` |
+| `priority_level` | Enum | Context priority | `L0`, `L1`, `L2`, `L3` |
+| `created_at` | Timestamp | Indexing time | `2026-07-08T20:00:00Z` |
+| `updated_at` | Timestamp | Last modification | `2026-07-08T20:00:00Z` |
+
+---
+
+## 6. HMC Compression Levels
+
+| Level | Name | Trigger Condition | Content Preserved | Content Discarded | Compression Ratio | Reconstructability |
+|-------|------|-------------------|-------------------|-------------------|-------------------|-------------------|
+| **L0** | Raw | Current active task | Full source code, comments, docstrings | Nothing | 1:1 | 100% |
+| **L1** | Semantic Summary | Token budget > 70% | Signature, inputs/outputs, logic flow, dependencies | Comments, docstrings, inline documentation | ~3:1 | ~95% |
+| **L2** | Module Abstraction | Token budget > 85% | Module purpose, API surface, data flow, key dependencies | Function bodies, implementation details | ~10:1 | ~80% |
+| **L3** | Archive | Token budget > 95% | Symbol reference + one-line description | All logic, all signatures | ~50:1 | ~40% (retrieval only) |
+| **Deleted** | — | After L3 exceeds capacity | Nothing | Everything | ∞ | 0% |
+
+---
+
+## 7. Context Manager Priority System
+
+| Priority Level | Content Type | Compression Applied | Eviction Order | Use Case |
+|----------------|-------------|---------------------|----------------|----------|
+| **L0** | Current user query + active reasoning chain | None | Never evicted | User is typing / model is generating |
+| **L1** | Active symbols (functions/classes being edited/referenced) | None | Evicted after L0 | Files open in editor, recently called functions |
+| **L2** | Compressed history (recently accessed symbols in SCM L1) | SCM Level 1 | Compress to L3 if needed | Recently viewed but not active code |
+| **L3** | Archive memory (repo-wide symbols, rarely accessed) | SCM Level 2 + HMC | Retrieve on demand from DuckDB | Entire repo knowledge base |
+
+---
+
+## 8. Adapter Layer Interface Specification
+
+| Method | Signature | Purpose | Input | Output | Complexity |
+|--------|-----------|---------|-------|--------|------------|
+| `retrieve` | `retrieve(query: str, context: ContextState, top_k: int = 5) -> List[Symbol]` | Find relevant symbols for a query | Natural language query + current context state | Ranked list of Symbol entities | O(log n) with FAISS |
+| `compress` | `compress(memory: MemoryState, target_budget: int) -> CompressedMemory` | Reduce memory to fit token budget | Current memory state + target token count | Compressed memory with priority tiers | O(n) where n = symbol count |
+| `inject` | `inject(symbols: List[Symbol], prompt: Prompt) -> AugmentedPrompt` | Insert symbols into model prompt | Retrieved symbols + base prompt | Prompt with structured memory context | O(k) where k = symbols injected |
+| `update` | `update(entity: Symbol, operation: CRUD) -> bool` | Add/modify/delete symbol in memory | Symbol entity + CRUD operation | Success/failure status | O(1) for single symbol |
+| `trace` | `trace(symbol_id: str, direction: Upstream/Downstream) -> List[Symbol]` | Trace dependency graph | Symbol ID + direction | Connected symbols in dependency graph | O(d) where d = dependency depth |
+
+---
+
+## 9. Benchmarking Plan
+
+### 9.1 Evaluation Datasets
+
+| Dataset | Task | Metric | Why It Matters | Priority |
+|---------|------|--------|---------------|----------|
+| **SWE-bench** | Real GitHub issue resolution | Pass@1 | End-to-end code generation with repo context | P0 |
+| **CodeSearchNet** | Code retrieval | MRR, NDCG | Symbol retrieval accuracy | P0 |
+| **LongCode** | Long-context code understanding | Accuracy | Context window efficiency | P1 |
+| **HumanEval** | Function synthesis | Pass@k | Baseline code generation (regression check) | P0 |
+| **RepoBench** | Cross-file code completion | Exact Match | Multi-file dependency understanding | P0 |
+| **Nooht Custom** | HMC reconstruction | Functional Equivalence | Can SCM reconstruct working code? | P0 |
+
+### 9.2 Baselines to Beat
+
+| Baseline | Configuration | What Beating This Proves | Priority |
+|----------|--------------|--------------------------|----------|
+| Nightglow-3B + Naive RAG | Text chunks + FAISS | Structured memory > text chunks | P0 |
+| Nightglow-3B + Long Context | 128K raw context | External memory > long context for code | P0 |
+| Nightglow-3B + No Memory | Direct prompting | Memory augmentation is necessary | P0 |
+| Qwen-2.5-7B + RAG | Larger model with RAG | Small model + Nooht can compete with larger models | P1 |
+| DeepSeek-Coder-6.7B | Larger specialized model | Efficiency advantage of small model + memory | P1 |
+
+### 9.3 Target Metrics (Nightglow-3B + Nooht)
+
+| Metric | Target | Current SOTA (Comparable) | Measurement Method |
+|--------|--------|--------------------------|-------------------|
+| Context Effective Utilization | ≥85% | ~40% for naive long context | Relevance scoring of retrieved context |
+| Token Efficiency | 10:1 vs. raw code | 2:1 for standard RAG | SCM token count / raw code token count |
+| Repo-Level Understanding | Pass 60% of RepoBench | ~30% for 3B models without memory | Cross-file completion accuracy |
+| Hallucination Rate | <20% | ~40% for 3B models | API call correctness in generated code |
+| Inference Speed | 1-20 tok/s on T4 | 5-15 tok/s for 7B models on T4 | End-to-end latency with retrieval |
+| Memory Indexing Time | <5 min for 100K LOC | ~30 min for RAPTOR on equivalent | Tree-sitter parsing + embedding time |
+| HMC Fidelity | >85% | N/A (new metric) | Reconstructed code test pass rate |
+| SCM Recall@5 | >90% | ~75% for code RAG | Top-5 retrieval accuracy on CodeSearchNet |
+
+---
+
+## 10. Team Assignment & Responsibilities
+
+| Role | Model | Responsibilities | Current Deliverables | Status |
+|------|-------|-------------------|---------------------|--------|
+| **Intelligence & Research Lead** | Kimi 2.6 | Literature review, technical reports, comparative analysis, architecture documentation | ✅ summary_report.md, ✅ Technical Comparison Whitepaper | Complete |
+| **Chief Creative Officer** | Grok 4 | Break architectural ceilings, propose impossible ideas, explore novel compression/retrieval paradigms | 🟡 Next: Graph database backend abstraction, adversarial test design | Pending |
+| **Chief Scientist (Validation)** | DeepSeek V4 | Feasibility verification, adapter API design, benchmark tooling, Nightglow interface testing | 🟡 Next: Adapter API stability test, Large-scale stress test | Pending |
+| **Chief Scientist (Audit)** | Qwen 3.7-Max | Nooht Audit Suite: Memory Integrity, HMC Fidelity, SCM Recall, Leakage tests | 🟡 Next: HMC Fidelity Test, SCM Recall Test | Pending |
+| **Technical Director** | ChatGPT 5.5 | System architecture, production-grade pseudocode, documentation consolidation, project management | 🟡 Next: System architecture diagrams, pseudocode modules, refactor plan | Pending |
+
+---
+
+## 11. Risk Register
+
+| Risk ID | Risk Description | Probability | Impact | Mitigation | Owner | Status |
+|---------|-----------------|-------------|--------|------------|-------|--------|
+| R001 | HMC compression loses functionally critical details | High | Critical | Implement dual-track: L0/L1 keep full code; HMC only for L2/L3; Fidelity test >85% | Qwen 3.7-Max | 🟡 Open |
+| R002 | Nightglow-3B cannot interpret SCM format without fine-tuning | High | Critical | Prepare SCM-format pretraining data (1B+ tokens); test zero-shot vs. fine-tuned | DeepSeek V4 | 🟡 Open |
+| R003 | DuckDB + FAISS degrades under million-symbol repos | Medium | High | Implement sharding; plan Neo4j backend for v0.3; stress test at 1M/5M/10M symbols | DeepSeek V4 | 🟡 Open |
+| R004 | Tree-sitter fails on complex macros / generated code | Medium | Medium | Fallback to text chunking for unparseable files; maintain parser coverage metrics | ChatGPT 5.5 | 🟡 Open |
+| R005 | Adapter API too simple for complex multi-file refactoring | Medium | High | Evolve into structured query DSL; add trace/dependency methods | DeepSeek V4 | 🟡 Open |
+| R006 | No real-time collaboration memory for multi-dev teams | Low | Medium | Defer to v0.2; document as known limitation | Grok 4 | 🟡 Open |
+| R007 | No temporal reasoning (git history) | Low | Medium | Defer to v0.3; document as known limitation | Grok 4 | 🟡 Open |
+| R008 | SCM oversimplifies edge cases and error handling | Medium | High | Add "critical paths" flag to entity schema; preserve error handling in L1 | Qwen 3.7-Max | 🟡 Open |
+| R009 | FAISS index tuning too complex for general users | Low | Low | Provide auto-tuning defaults; document manual tuning for advanced users | ChatGPT 5.5 | 🟡 Open |
+| R010 | Cross-repo dependency indexing not supported | Low | Medium | Defer to v0.3; focus on single-repo for v0.1 | Grok 4 | 🟡 Open |
+
+---
+
+## 12. Validation Checklist (Release Gate)
+
+| Gate | Requirement | Pass Criteria | Owner | Status |
+|------|-------------|---------------|-------|--------|
+| G001 | Symbol Memory Design Review | Architecture document approved by all team members | Kimi 2.6 | ✅ Pass |
+| G002 | DuckDB Backend Implementation | All CRUD operations working; 100K LOC indexed in <5 min | ChatGPT 5.5 | ✅ Pass |
+| G003 | FAISS Retrieval Implementation | Top-5 retrieval latency <100ms on T4 | ChatGPT 5.5 | ✅ Pass |
+| G004 | Context Manager Implementation | L0-L3 priority eviction working correctly | ChatGPT 5.5 | ✅ Pass |
+| G005 | Adapter Layer Design | Interface specification approved; zero model modification | DeepSeek V4 | ✅ Pass |
+| G006 | HMC Fidelity Test | SCM-reconstructed code passes >85% of original test cases | Qwen 3.7-Max | 🟡 Pending |
+| G007 | SCM Recall Test | Top-5 recall >90% on CodeSearchNet benchmark | Qwen 3.7-Max | 🟡 Pending |
+| G008 | Large Scale Stress Test | DuckDB + FAISS stable at 1M+ symbols | DeepSeek V4 | 🟡 Pending |
+| G009 | Adapter API Stability | Nightglow interface test passes without regression | DeepSeek V4 | 🟡 Pending |
+| G010 | Memory Integrity Test | No data loss across compression/decompression cycles | Qwen 3.7-Max | 🟡 Pending |
+| G011 | Leakage Test | No sensitive information leakage in SCM compression | Qwen 3.7-Max | 🟡 Pending |
+| G012 | Benchmark Suite | Nightglow-3B + Nooht beats Nightglow-3B + Naive RAG by >20% | DeepSeek V4 | 🟡 Pending |
+| G013 | Code Freeze | No core architecture changes after freeze | ChatGPT 5.5 | 🟡 Conditional |
+| G014 | Documentation | API reference + user guide + architecture spec complete | ChatGPT 5.5 | 🟡 Pending |
+| G015 | Unit Test Coverage | >80% line coverage across all modules | Qwen-Coder | 🟡 Pending |
+
+---
+
+## 13. Project Timeline
+
+| Phase | Duration | Key Deliverables | Dependencies | Status |
+|-------|----------|-----------------|-------------|--------|
+| **Phase 1: Validation** | Q3 2026 | HMC Fidelity Test, SCM Recall Test, Large Scale Stress Test, Adapter API Nightglow Integration, Memory Integrity Test, Leakage Test | Architecture approval | 🟡 In Progress |
+| **Phase 2: Engineering** | Q4 2026 | Packaging, Documentation, Unit Tests (>80% coverage), Refactor, Code Freeze | Phase 1 gates passed | 🔴 Not Started |
+| **Phase 3: Integration** | Q1 2027 | Nightglow-3B adapter optimization, Benchmark execution, T4 performance profiling, Community release | Phase 2 complete | 🔴 Not Started |
+| **Phase 4: Evolution** | Q2 2027+ | Real-time collaboration memory, Git history temporal memory, Type system integration, Execution trace ingestion, Cross-repo dependency indexing | Phase 3 stable | 🔴 Not Started |
+
+---
+
+## 14. Glossary
+
+| Term | Definition |
+|------|------------|
+| **ANM** | Approximate Nearest Neighbor — efficient vector similarity search |
+| **AST** | Abstract Syntax Tree — structured representation of source code |
+| **DuckDB** | In-process analytical database with columnar vectorized execution |
+| **FAISS** | Facebook AI Similarity Search — GPU-accelerated vector search library |
+| **HMC** | Hierarchical Memory Compression — Nooht's compression-before-deletion strategy |
+| **HNSW** | Hierarchical Navigable Small World — graph-based ANN algorithm |
+| **IVF** | Inverted File Index — clustering-based ANN method |
+| **KV Cache** | Key-Value cache in transformer attention mechanism |
+| **LOC** | Lines of Code |
+| **PQ** | Product Quantization — vector compression technique |
+| **RAG** | Retrieval-Augmented Generation |
+| **SCM** | Semantic Code Memory — code-to-semantic representation transformation |
+| **Symbol** | Structured code entity (Function, Class, API, Import, etc.) |
+| **Tree-sitter** | Incremental parsing library supporting 40+ programming languages |
+
+---
+
+## 15. References
+
+| # | Citation | Relevance |
+|---|----------|-----------|
+| 1 | Chen et al. (2024). *Melodi: Exploring Memory Compression for Long Contexts*. arXiv:2410.03156. | Hierarchical compression principle |
+| 2 | HMT Authors (2025). *Hierarchical Memory Transformer for Efficient Long Document Modeling*. NAACL 2025. | Three-tier memory architecture |
+| 3 | H2MT Authors (2026). *Semantic Hierarchy-Aware Hierarchical Memory Transformer*. arXiv:2605.24930. | Hierarchy-aware retrieval units |
+| 4 | Sarthi et al. (2024). *RAPTOR: Recursive Abstractive Processing for Tree-Organized Retrieval*. arXiv:2401.18059. | Tree-structured retrieval |
+| 5 | KV-RAPTOR Authors (2025). *KV-RAPTOR: Scalable Tree-Structured Retrieval with KV-Cache Optimization*. SBC 2025. | KV cache + tree retrieval hybrid |
+| 6 | Memory in the LLM Era Authors (2026). *Memory in the LLM Era: Modular Architectures and Strategies*. arXiv:2604.01707. | Comprehensive memory survey |
+| 7 | Packer et al. (2023). *MemGPT: Towards LLMs as Operating Systems*. arXiv:2310.08560. | Agent memory architecture |
+| 8 | Chhikara et al. (2025). *Mem0: The Memory Layer for AI Agents*. | Agent memory with graph support |
+| 9 | Edge et al. (2025). *From Local to Global: A Graph RAG Approach*. Microsoft Research. | Graph-based RAG for structured data |
+| 10 | DuckDB Community Extensions. *FAISS Extension for DuckDB*. | DuckDB-FAISS integration |
+
+---
+
+*"Nooht is not about making the model remember more tokens. It is about giving the model a compressible, retrievable, and long-term maintainable code cognition system. Nightglow is not a bigger model — it is a smaller model with a smarter memory mechanism."*
+
+**— Nooht Core Thesis, v0.1-alpha**
+
+---
+
+**Document End**
+"""
