@@ -4,7 +4,7 @@ import os
 base_dir = "/mnt/agents/output/nooht"
 
 # ============================================================
-# Enhanced README.md with detailed descriptions
+ README.md
 # ============================================================
 
 readme_md = r'''# 🌙 Nooht Framework
