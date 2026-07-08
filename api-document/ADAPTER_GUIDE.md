@@ -1,6 +1,6 @@
 
 # ============================================================
-# 9. api-document/ADAPTER_GUIDE.md
+# 9. ADAPTER_GUIDE.md
 # ============================================================
 
 adapter_guide_md = r'''# Nooht Framework — Adapter Integration Guide
