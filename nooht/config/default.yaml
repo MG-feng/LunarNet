@@ -1,0 +1,23 @@
+project_name: "Nooht"
+version: "0.2.1"
+
+ktu:
+  char_dim: 128
+  token_dim: 512
+  structure_dim: 256
+  ktu_dim: 768
+
+memory:
+  l0_max_bytes: 17179869184
+  l1_max_size: 1000
+  l2_max_size: 100
+
+scheduler:
+  max_concurrent_tasks: 100
+  task_history_limit: 10000
+
+runtime:
+  devices:
+    - cpu
+  precision: fp32
+  num_workers: 4
