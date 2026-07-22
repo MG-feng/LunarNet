@@ -7,6 +7,14 @@ import uuid
 
 class Scheduler(ABC):
     @abstractmethod
+    async def start(self):
+        pass
+    
+    @abstractmethod
+    async def stop(self):
+        pass
+    
+    @abstractmethod
     async def submit(self, task: 'Task') -> bool:
         pass
     
